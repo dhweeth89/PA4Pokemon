@@ -8,6 +8,8 @@
 #include "Model.h"
 #include "View.h"
 #include "GameCommand.h"
+#include "Rival.h"
+#include "BattleArena.h"
 
 #include <iostream>
 #include "string.h"
@@ -124,6 +126,22 @@ int main()
 
             case 'q':
             {
+                break;
+            }
+
+            case 'b':
+            {
+                cin >> id1;
+                cin >> id2;
+                DoBattleInArenaCommand(model, id1, id2);
+                break;
+            }
+
+            case 'a':
+            {
+                cin >> id1;
+                cin >> id2;
+                DoMoveToArenaCommand(model, id1, id2);
                 break;
             }
 

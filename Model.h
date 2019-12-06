@@ -11,6 +11,9 @@
 #include "View.h"
 
 #include <iostream>
+#include <list>
+#include <iterator>
+
 #include "string.h"
 
 
@@ -20,30 +23,43 @@ class Model
     private:
 
     int time;
-    GameObject* object_ptrs[10];
-    int num_objects;
-    Pokemon* pokemon_ptrs[10];
-    int num_pokemon;
-    PokemonCenter* center_ptrs[10];
-    int num_centers;
-    PokemonGym* gym_ptrs[10];
-    int num_gyms;
+    
+    list <GameObject*> object_ptrs;
+    //int num_objects;
+    list <GameObject*> active_ptrs;
+    //int num_active;
+    list <Pokemon*> pokemon_ptrs;
+    //int num_pokemon;
+    list <PokemonCenter*> center_ptrs;
+    //int num_centers;
+    list <PokemonGym*> gym_ptrs;
+    //int num_gyms;
+    list <BattleArena*> arena_ptrs;
+    //int num_arenas;
+    list <Rival*> rival_ptrs;
+    //int num_rivals;
 
     public:
 
     Model();
     ~Model();
+    
     Pokemon* GetPokemonPtr(int id);
     PokemonCenter* GetPokemonCenterPtr(int id);
     PokemonGym* GetPokemonGymPtr(int id);
+    BattleArena* GetArenaPtr(int id);
+    Rival* GetRivalPtr(int id);
+
     bool Update();
     void Display(View& view);
     void ShowStatus();
 
-    int GetNumObjects();
-    int GetNumCenters();
-    int GetNumGyms();
-    int GetNumPokemon();
+    //int GetNumObjects();
+    //int GetNumCenters();
+    //int GetNumGyms();
+    //int GetNumPokemon();
+    //int GetNumArenas();
+    //int GetNumRivals();
 
 
 

@@ -22,6 +22,7 @@ using namespace std;
     void DoStopCommand(Model&, int);
     void DoTrainInGymCommand(Model&, int, unsigned int);
     void DoRecoverInCenterCommand(Model&, int, unsigned int);
+    void DoBattleInArenaCommand(Model&, int, int);
     //void DoGoCommand(Model&, View&);
     //void DoRunCommand(Model&, View&);
 
@@ -77,6 +78,22 @@ void DoMoveToGymCommand(Model& model, int pokemon_id, int gym_id)
     
 }
 
+void DoMoveToArenaCommand(Model& model, int pokemon_id, int arena_id)
+{
+    if ( (pokemon_id <= 0 || pokemon_id > model.GetNumPokemon()) || (arena_id <= 0 || arena_id > model.GetNumArenas() ) )
+    {
+        cout << "Error: Please enter a valid command!" << endl;
+    }
+    else
+    {
+        Pokemon* ptrPokemon = model.GetPokemonPtr(pokemon_id);
+        BattleArena* ptrArena = model.GetArenaPtr(arena_id);
+
+        cout << "Moving " << ptrPokemon->getName() << " to Arena " << arena_id << endl;
+        ptrPokemon->StartMovingToArena(ptrArena);
+    }
+}
+
 
 void DoStopCommand(Model& model, int pokemon_id)
 {
@@ -126,7 +143,6 @@ void DoRecoverInCenterCommand(Model& model, int pokemon_id, unsigned int stamina
     }
 }
 
-
 void DoGoCommand(Model& model, View& view)
 {
     cout << "Advancing one tick." << endl;
@@ -151,4 +167,31 @@ void DoRunCommand(Model& model, View& view)
 
     //If the thing updates, it stops running.  If i reaches 5, you stop.  Only one of these conditions has to be met to exit loop
 }
+
+void DoBattleInArenaCommand(Model& model, int pokemon_id, int rival_id)
+{
+    if (pokemon_id <= 0 || pokemon_id > model.GetNumPokemon())
+    {
+        cout << "Please enter a valid pokemon_id" << endl;
+    }
+    else
+    {
+        if (rival_id <= 0 || rival_id > model.GetNumRivals())
+        {
+            cout << "Please enter a valid rival_id" << endl;
+        }
+        else
+        {
+            Pokemon* ptrPokemon = model.GetPokemonPtr(pokemon_id);
+            Rival* ptrRival = model.GetRivalPtr(rival_id);
+            cout << ptrPokemon->getName() << " battling " << ptrRival->GetName() << endl;
+           
+            ptrPokemon->ReadyBattle(ptrRival);
+        }
+        
+    }
+}
+
+
+
 

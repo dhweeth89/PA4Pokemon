@@ -1,11 +1,11 @@
 CC=g++ -g
 
-OBJS=main.o Building.o Point2D.o Vector2D.o GameObject.o GameCommand.o PokemonCenter.o Model.o Pokemon.o PokemonGym.o View.o
+OBJS=main.o Building.o Point2D.o Vector2D.o GameObject.o GameCommand.o PokemonCenter.o Model.o Pokemon.o PokemonGym.o View.o Rival.o BattleArena.o
 
-default: PA3
+default: PA4
 
-PA3: $(OBJS)
-	$(CC) -o PA3 $(OBJS) 
+PA4: $(OBJS)
+	$(CC) -o PA4 $(OBJS) 
 
 Vector2D.o: Vector2D.cpp Vector2D.h
 	$(CC) -c Vector2D.cpp -o Vector2D.o 
@@ -37,9 +37,15 @@ Pokemon.o: Pokemon.cpp Pokemon.h GameObject.h Point2D.h Vector2D.h PokemonGym.h 
 GameCommand.o: GameCommand.cpp GameCommand.h Model.h GameObject.h Pokemon.h PokemonGym.h PokemonCenter.h
 	$(CC) -c GameCommand.cpp -o GameCommand.o
 
-main.o: main.cpp Building.h Point2D.h Vector2D.h GameCommand.h PokemonCenter.h Model.h Pokemon.h PokemonGym.h GameObject.h View.h
+Rival.o: Rival.cpp Rival.h GameObject.h
+	$(CC) -c Rival.cpp -o Rival.o
+
+BattleArena.o: BattleArena.cpp BattleArena.h GameObject.h Point2D.h
+	$(CC) -c BattleArena.cpp -o BattleArena.o
+
+main.o: main.cpp Building.h Point2D.h Vector2D.h GameCommand.h PokemonCenter.h Model.h Pokemon.h PokemonGym.h GameObject.h View.h Rival.h BattleArena.h
 	$(CC) -c main.cpp
 
 clean: 
-	rm $(OBJS) PA3
+	rm $(OBJS) PA4
 

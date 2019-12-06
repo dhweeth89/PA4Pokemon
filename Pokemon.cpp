@@ -40,6 +40,11 @@ Pokemon::Pokemon() : GameObject('P')
     destination = Point2D();
     state = STOPPED;
     delta = Vector2D();
+    health = 20;
+    store_health = health;
+    physical_damage = 5;
+    magical_damage = 4;
+    defense = 15;
 
     cout << "Pokemon default constructed." << endl;
 }
@@ -60,6 +65,12 @@ Pokemon::Pokemon(char in_code) : GameObject(in_code)
     destination = Point2D();
     delta = Vector2D();
     state = STOPPED;
+
+    health = 20;
+    store_health = health;
+    physical_damage = 5;
+    magical_damage = 4;
+    defense = 15;
     cout << "Pokemon default constructed." << endl;   
 
 }
@@ -77,9 +88,18 @@ Pokemon::Pokemon(string in_name, int in_id, char in_code, unsigned int in_speed,
     stamina_points_to_buy = 0;
     current_center = NULL;
     current_gym = NULL;
+    current_arena = NULL;
+    target = NULL;
     destination = Point2D();
     delta = Vector2D();
     state = STOPPED;
+
+    health = 20;
+    store_health = health;
+    physical_damage = 5;
+    magical_damage = 4;
+    defense = 15;
+
     cout << "Pokemon constructed" << endl;
 }
 
@@ -139,6 +159,12 @@ void Pokemon::StartMovingToCenter(PokemonCenter* center)
         current_gym = NULL;
     } 
     
+    if (state == IN_ARENA)
+    {
+        current_arena->RemoveOnePokemon();
+        current_arena = NULL;
+    }
+    
     
     current_center = center;
 
@@ -177,6 +203,14 @@ void Pokemon::StartMovingToGym(PokemonGym* gym)
         current_gym = NULL;
     }
 
+    
+    if (state == IN_ARENA)
+    {
+        current_arena->RemoveOnePokemon();
+        current_arena = NULL;
+    }
+    
+
     current_gym = gym;
  
     if (this->state == EXHAUSTED)
@@ -196,6 +230,58 @@ void Pokemon::StartMovingToGym(PokemonGym* gym)
         state = MOVING_TO_GYM;
     }
 }
+
+//Start of new function
+void Pokemon::StartMovingToArena(BattleArena* arena)
+{
+    SetupDestination(arena->GetLocation());
+    
+
+    if (state == IN_CENTER)
+    {
+        current_center->RemoveOnePokemon();
+        current_center = NULL;
+    }
+
+    if (state == IN_GYM)
+    {
+        current_gym->RemoveOnePokemon();
+        current_gym = NULL;
+    }
+
+    if (state == IN_ARENA)
+    {
+        current_arena->RemoveOnePokemon();
+        current_arena = NULL;
+    }
+
+    current_arena = arena;
+ 
+    if (this->state == EXHAUSTED)
+    {
+        cout << this->display_code << this->id_num << ": I am exhausted so I shouldn't be going to the gym..." << endl;
+    }
+    else if ((fabs(this->location.x - destination.x)) <= fabs(delta.x) && (fabs(this->location.y - destination.y) <= fabs(delta.y)))
+    {
+        cout << this->display_code << this->id_num << ": I'm already at the Battle Arena!" << endl;
+        location.x = destination.x;
+        location.y = destination.y;
+        state = IN_ARENA;
+    }
+    else
+    {
+        cout << this->display_code << this->id_num << ": On my way to Battle Arena " << arena->GetId() << endl;
+        state = MOVING_TO_ARENA;
+    }
+}
+
+
+
+
+
+
+//End of New function
+
 
 void Pokemon::StartTraining(unsigned int num_training_units)
 {
@@ -375,10 +461,41 @@ void Pokemon::ShowStatus()
         case EXHAUSTED:
         {
             cout << "\tExhausted " << endl;
-        }   
-    
+            break;
+        }
+
+        case MOVING_TO_ARENA:
+        {
+            cout << "\tHeading to Battle Arena " << current_arena->GetId() << " at a speed of " << speed << " at each step of " << delta << endl;
+            break;
+        }
+
+        case IN_ARENA:
+        {
+            cout << "\tInside Battle Arena " << current_arena->GetId() << endl;
+            break;
+        }
+
+        case BATTLE:
+        {
+            cout << "\tBattling " << target->GetName() << endl;
+            break;
+        }
+
+        case FAINTED:
+        {
+            cout << "\tFainted" << endl;
+        }
+
+        default:
+        {
+        }
    }
 
+   cout << "\tHP: " << health << endl;
+   cout << "\tPhysical Damage: " << physical_damage << endl;
+   cout << "\tMagic Damage: " << magical_damage << endl;
+   cout << "\tDefense: " << defense << "%" << endl;
    cout << "\tStamina: " << stamina << endl;
    cout << "\tPokemon Dollars: " << pokemon_dollars << endl;
    cout << "\tExperience Points: " << experience_points << endl;
@@ -573,6 +690,66 @@ bool Pokemon::Update()
            return true;
         }
 
+        case MOVING_TO_ARENA:
+        {
+            if (UpdateLocation() && IsExhausted() == false)
+            {
+                state = IN_ARENA;
+                current_arena->AddOnePokemon();
+                return true;
+            }
+            else
+            {
+                if (IsExhausted())
+                {
+                    state = EXHAUSTED;
+                    return true;
+                }
+                else
+                {
+                    state = MOVING_TO_ARENA;
+                    return false;
+                }
+            }
+            
+        }
+
+        case IN_ARENA:
+        {
+            if (IsExhausted())
+            {
+                state = EXHAUSTED;
+                current_arena->RemoveOnePokemon();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        case BATTLE:
+        {
+            if (StartBattle() == true)
+            {
+                state = FAINTED;
+                target->IsAlive();
+                return true;
+            }
+            else
+            {
+                state = IN_ARENA;
+                health = store_health;
+                target->IsAlive();
+                return false;
+            }
+        }
+
+        case FAINTED:
+        {
+            return false;
+        }
+
         default: 
         {
             return false;
@@ -622,6 +799,87 @@ void Pokemon::SetupDestination(Point2D dest)
     }
     
 }
+
+//bool IsAlive();
+//void TakeHit(double, double, double);
+//void ReadyBattle(Rival*);
+//bool StartBattle();
+
+bool Pokemon::IsAlive()
+{
+    if (state == FAINTED)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}        
+
+void Pokemon::TakeHit(double physical_damage, double magical_damage, double defense)
+{
+    double damage;
+
+    if ( ((double) rand() / (RAND_MAX)) < .5)
+    {
+        damage = ((100.0 - defense)/100) * physical_damage;
+        cout << display_code << id_num << ": Physical attack was done to me" << endl;
+    }
+    else
+    {
+        damage = ((100.0 - defense)/100) * magical_damage;
+        cout << display_code << id_num << ": Magic attack was done to me" << endl;
+    }
+    
+    health -= damage;
+}
+
+
+void Pokemon::ReadyBattle(Rival* in_target)
+{
+    if (state == IN_ARENA)
+    {
+        if ((current_arena->IsAbleToFight(pokemon_dollars, stamina) == true) && (current_arena->IsBeaten() == false) && (in_target->IsAlive()))
+        {
+            target = in_target;
+            state = BATTLE;
+        }
+        else
+        {
+            state = IN_ARENA;
+            cout << "Pokemon may not have enough money/stamina, Arena may be beaten already, or Rival is already defeated" << endl;
+        }
+    }
+    else
+    {
+        cout << "I must be in an arena to battle" << endl;
+    }
+}
+
+bool Pokemon::StartBattle()
+{
+    while (target->Get_Health() > 0 && this->health > 0)
+    {
+        this->TakeHit(target->Get_Phys_Dmg(), target->Get_Magic_Dmg(), target->Get_Defense());
+        if (this->health > 0)
+        {
+            target->TakeHit(physical_damage, magical_damage, defense);
+        }
+    }
+
+    if (this->health <= 0)
+    {
+        cout << "Rival won, " << name << " is dead." << endl;
+        return true;
+    }
+    else
+    {
+        cout << name << " won, Rival is dead." << endl;
+        return false;
+    }
+}
+
 
 string Pokemon::getName()
 {
