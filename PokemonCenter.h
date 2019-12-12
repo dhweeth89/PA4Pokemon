@@ -32,6 +32,7 @@ class PokemonCenter : public Building
     unsigned int DistributeStamina(unsigned int);
     bool Update();
     void ShowStatus();
+    virtual string getName();
 
 };
 

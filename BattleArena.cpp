@@ -129,6 +129,7 @@ bool BattleArena::IsBeaten()
 
 void BattleArena::ShowStatus()
 {
+    cout << "Battle Arena status: ";
     Building::ShowStatus();
     cout << "\tMax number of rivals: " << max_num_rivals << endl;
     cout << "\tStamina cost per fight: " << stamina_cost_per_fight << endl;;
@@ -150,6 +151,16 @@ void BattleArena::RemoveRival()
     {
         num_rivals_remaining--;
     }
+}
+
+void BattleArena::AddRival()
+{
+    num_rivals_remaining++;
+}
+
+string BattleArena::getName()
+{
+    return "";
 }
 
 

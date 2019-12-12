@@ -42,7 +42,7 @@
         void ShowStatus();
         bool IsAlive();
         bool ShouldBeVisible();
-        string GetName();
+        string getName();
     };
     
 #endif

@@ -22,6 +22,8 @@ class Building : public GameObject
         void ShowStatus();
 
         bool ShouldBeVisible();
+
+        virtual string getName();
 };
 
 #endif

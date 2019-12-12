@@ -32,7 +32,8 @@
         unsigned int TrainPokemon(unsigned int);
         bool Update();
         bool IsBeaten();
-        void ShowStatus();        
+        void ShowStatus();
+        virtual string getName();        
     };
     
 #endif

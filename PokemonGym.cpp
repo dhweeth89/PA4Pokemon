@@ -128,3 +128,8 @@ void PokemonGym::ShowStatus()
     cout << endl;    
 }
 
+string PokemonGym::getName()
+{
+    return "";
+}
+

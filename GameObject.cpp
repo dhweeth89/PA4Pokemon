@@ -45,6 +45,11 @@ char GameObject::GetState()
     return state;
 }
 
+char GameObject::GetDisplayCode()
+{
+    return display_code;
+}
+
 void GameObject::ShowStatus()
 {
     cout << display_code << id_num << " at " << location << endl;

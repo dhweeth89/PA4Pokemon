@@ -12,6 +12,7 @@
 #include "stdlib.h"
 #include "Rival.h"
 #include "BattleArena.h"
+#include "Input_Handling.h"
 
 #include <iostream>
 #include <list>
@@ -137,11 +138,12 @@ unsigned int exp_points_per_unit, int in_id, Point2D in_loc) : Building('G', in_
 
    Model::~Model()
    {
-       for (int i = 0; i < object_ptrs.size(); i++)
+       list<GameObject*>::iterator iterator;
+       
+       for (iterator = object_ptrs.begin(); iterator != object_ptrs.end(); iterator++)
        {
-           delete object_ptrs.front();
+           delete (*iterator);
        }
-
        cout << "Model destructed." << endl;
    }
 
@@ -213,7 +215,7 @@ unsigned int exp_points_per_unit, int in_id, Point2D in_loc) : Building('G', in_
    bool Model::Update()
    {
        bool status_to_return = false;
-       int gyms_beaten_counter = 0;
+       //int gyms_beaten_counter = 0;
        int pokemon_exhausted_counter = 0;
        int pokemon_fainted_counter = 0;
        int arenas_beaten_counter = 0;
@@ -228,74 +230,195 @@ unsigned int exp_points_per_unit, int in_id, Point2D in_loc) : Building('G', in_
            }
        }
 */
-        for (int i = 0; i < num_gyms; i++)
+
+        list<GameObject*>::iterator iterator;
+
+        for (iterator = active_ptrs.begin(); iterator != active_ptrs.end(); iterator++)
         {
-            if (gym_ptrs[i]->Update() == true)
+            if ((*iterator)->Update() == true)
             {
                 status_to_return = true;
             }
 
-            if (gym_ptrs[i]->GetState() == BEATEN)
+            if ((*iterator)->GetDisplayCode() == 'P' || (*iterator)->GetDisplayCode() == 'p')
             {
-                gyms_beaten_counter += 1;
+                if ((*iterator)->GetState() == EXHAUSTED)
+                {
+                    cout << (*iterator)->getName() << " has been removed" << endl;
+                    iterator = active_ptrs.erase((iterator));
+                    //pokemon_exhausted_counter += 1;    
+                }
+                if ((*iterator)->GetState() == FAINTED)
+                {
+                    cout << (*iterator)->getName() << " has been removed" << endl;
+                    iterator = active_ptrs.erase((iterator));
+                    //pokemon_fainted_counter += 1;    
+                }
+
+            }
+
+            if ((*iterator)->GetDisplayCode() == 'G' || (*iterator)->GetDisplayCode() == 'g')
+            {
+                if ((*iterator)->GetState() == BEATEN)
+                {
+                    cout << "Pokemon Gym " << (*iterator)->GetId() << " has been removed" << endl;
+                    iterator = active_ptrs.erase(iterator);
+                }
+            }
+
+            if ((*iterator)->GetDisplayCode() == 'C' || (*iterator)->GetDisplayCode() == 'c')
+            {
+                if ((*iterator)->GetState() == NO_STAMINA_POINTS_AVAILABLE)
+                {
+                    cout << "Pokemon Center " << (*iterator)->GetId() << " has been removed" << endl;
+                    iterator = active_ptrs.erase(iterator);
+                }
+            }
+
+            if ((*iterator)->GetDisplayCode() == 'R' || (*iterator)->GetDisplayCode() == 'r')
+            {
+                if ((*iterator)->GetState() == FAINTED_RIVAL)
+                {
+                    cout << (*iterator)->getName() << " has been removed" << endl;
+                    iterator = active_ptrs.erase(iterator);
+                }
+            }
+
+            if ((*iterator)->GetDisplayCode() == 'A')
+            {
+                if ((*iterator)->GetState() == NO_RIVALS_AVAILABLE)
+                {
+                    cout << "Battle Arena " << (*iterator)->GetId() << " has been removed" << endl;
+                    iterator = active_ptrs.erase(iterator);
+                    //arenas_beaten_counter += 1;
+                }
             }
         }
 
-        for (int i=0; i < num_centers; i++)
+        cout << active_ptrs.size() << endl;
+
+    /*
+
+        list<PokemonGym*>::iterator iterator;
+        iterator = gym_ptrs.begin();
+
+        for (int i = 0; i < gym_ptrs.size(); i++)
         {
-            if (center_ptrs[i]->Update() == true)
+            if ((*iterator)->Update() == true)
             {
                 status_to_return = true;
             }
+            ++iterator;
         }
 
-        for (int i = 0; i < num_pokemon; i++)
+        list<PokemonCenter*>::iterator iterator1;
+        iterator1 = center_ptrs.begin();
+
+        for (int i = 0; i < center_ptrs.size(); i++)
         {
-            if (pokemon_ptrs[i]->Update() == true)
+            if ((*iterator1)->Update() == true)
             {
                 status_to_return = true;
             }
 
-            if (pokemon_ptrs[i]->GetState() == EXHAUSTED)
+            if ((*iterator1)->GetState() == NO_STAMINA_POINTS_AVAILABLE)
+            {
+                active_ptrs.remove((*iterator1));
+            }
+
+            ++iterator1;
+        }
+
+        list<Pokemon*>::iterator iterator2;
+        iterator2 = pokemon_ptrs.begin();
+
+
+        for (int i = 0; i < pokemon_ptrs.size(); i++)
+        {
+            if ((*iterator2)->Update() == true)
+            {
+                status_to_return = true;
+            }
+
+            if ((*iterator2)->GetState() == EXHAUSTED)
             {
                 pokemon_exhausted_counter += 1;
+                active_ptrs.remove(*iterator2);
             }
-
-            if (pokemon_ptrs[i]->GetState() == FAINTED)
+            else if ((*iterator2)->GetState() == FAINTED)
             {
                 pokemon_fainted_counter += 1;
+                active_ptrs.remove(*iterator2);
             }
+            ++iterator2;
         }
 
-        for (int i = 0; i < num_arenas; i++)
+        list <BattleArena*>::iterator iterator3;
+        iterator3 = arena_ptrs.begin();
+
+        for (int i = 0; i < arena_ptrs.size(); i++)
         {
-            if (arena_ptrs[i]->Update() == true)
+            if ((*iterator3)->Update() == true)
             {
                 status_to_return = true;
             }
 
-            if (arena_ptrs[i]->GetState() == NO_RIVALS_AVAILABLE)
+            if ((*iterator3)->GetState() == NO_RIVALS_AVAILABLE)
             {
                 arenas_beaten_counter += 1;
+                active_ptrs.remove(*iterator3);
             }
+            ++iterator3;
         }
 
-        for (int i = 0; i < num_rivals; i++)
+        list <Rival*>::iterator iterator4;
+        iterator4 = rival_ptrs.begin();
+
+        for (int i = 0; i < rival_ptrs.size(); i++)
         {
-            if (rival_ptrs[i]->Update() == true)
+            if ((*iterator4)->Update() == true)
             {
                 status_to_return = true;
             }
+
+            ++iterator4;
         }
 
 
+    */
 
-        if (arenas_beaten_counter == num_arenas)
+        list<GameObject*>::iterator iterator1;
+
+        for (iterator1 = object_ptrs.begin(); iterator1 != object_ptrs.end(); iterator1++)
+        {
+            if ((*iterator1)->GetDisplayCode() == 'P' || (*iterator1)->GetDisplayCode() == 'p')
+            {
+                if ((*iterator1)->GetState() == EXHAUSTED)
+                {
+                    pokemon_exhausted_counter += 1;    
+                }
+                if ((*iterator1)->GetState() == FAINTED)
+                {
+                    pokemon_fainted_counter += 1;    
+                }
+            }
+
+            if ((*iterator1)->GetDisplayCode() == 'A')
+            {
+                if ((*iterator1)->GetState() == NO_RIVALS_AVAILABLE)
+                {
+                    arenas_beaten_counter += 1;
+                }
+            }
+        }
+
+        
+        if (arenas_beaten_counter == arena_ptrs.size())
         {
             cout << "GAME OVER: You win! All Battle Arenas Beaten!" << endl;
             exit(EXIT_SUCCESS);
         }
-        else if ( (pokemon_exhausted_counter + pokemon_fainted_counter) == num_pokemon)
+        else if ( (pokemon_exhausted_counter + pokemon_fainted_counter) == pokemon_ptrs.size())
         {
             cout << "GAME OVER: You lose! All of your Pokemon are either tired or fainted!" << endl;
             exit(EXIT_FAILURE);
@@ -312,49 +435,167 @@ unsigned int exp_points_per_unit, int in_id, Point2D in_loc) : Building('G', in_
        cout << endl;
        this->ShowStatus();
        view.Clear();
-       for (int i=0; i<num_objects; i++)
+
+       list<GameObject*>::iterator iterator;
+       iterator = active_ptrs.begin();
+
+       for (iterator = active_ptrs.begin(); iterator != active_ptrs.end(); iterator++)
        {
-           view.Plot(object_ptrs[i]);
+           view.Plot((*iterator));
        }
+
        view.Draw();
    }
 
 
    void Model::ShowStatus()
    {
-       for (int i = 0; i < num_objects; i++ )
+       list<GameObject*>::iterator iterator;
+       iterator = object_ptrs.begin();
+
+       
+       for (int i = 0; i < object_ptrs.size(); i++ )
        {
-           object_ptrs[i]->ShowStatus();
+           (*iterator)->ShowStatus();
+           ++iterator;
        }
    }
 
 
     int Model::GetNumObjects()
     {
-        return this->num_objects;
+        return object_ptrs.size();
     }
 
     int Model::GetNumCenters()
     {
-        return this->num_centers;
+        return center_ptrs.size();
     }
 
     int Model::GetNumGyms()
     {
-        return this->num_gyms;
+        return gym_ptrs.size();
     }
 
     int Model::GetNumPokemon()
     {
-        return this->num_pokemon;
+        return pokemon_ptrs.size();
     }
 
     int Model::GetNumArenas()
     {
-        return this->num_arenas;
+        return arena_ptrs.size();
     }
 
     int Model::GetNumRivals()
     {
-        return this->num_rivals;
+        return rival_ptrs.size();
     }
+
+    void Model::NewCommand(char type, int id, double x, double y)
+    {
+        cout << "These objects will be built with default values" << endl;
+        
+        if (type == 'g' || type == 'G')
+        {
+            if (gym_ptrs.size() >= id)
+            {
+                throw Invalid_Input("Gym with this ID num already exists, even if not active");
+            }
+
+            if (id > 9 || id <= 0)
+            {
+                throw Invalid_Input("Do not enter an ID greater than 9 or 0/below");
+            }
+            
+            PokemonGym* g1 = new PokemonGym(10, 1, 1.5, 3.3, id, Point2D(x,y));
+            object_ptrs.push_back(g1);
+            active_ptrs.push_back(g1);
+            gym_ptrs.push_back(g1);
+        }
+        else if (type == 'c' || type == 'C')
+        {
+            if (center_ptrs.size() >= id)
+            {
+                throw Invalid_Input("Center with this ID num already exists, even if not active");
+            }
+
+            if (id > 9 || id <= 0)
+            {
+                throw Invalid_Input("Do not enter an ID greater than 9 or 0/below");
+            }
+            
+            PokemonCenter* c1 = new PokemonCenter(id, 2, 100, Point2D(x,y));
+            object_ptrs.push_back(c1);
+            active_ptrs.push_back(c1);
+            center_ptrs.push_back(c1);
+        }
+
+        else if (type == 'p' || type == 'p')
+        {
+            if (pokemon_ptrs.size() >= id)
+            {
+                throw Invalid_Input("Pokemon with this ID num already exists, even if not active");
+            }
+
+            if (id > 9 || id <= 0)
+            {
+                throw Invalid_Input("Do not enter an ID greater than 9 or 0/below");
+            }
+
+            Pokemon* p1 = new Pokemon("Default Pokemon", id, 'P', 2, Point2D(x,y));
+            object_ptrs.push_back(p1);
+            active_ptrs.push_back(p1);
+            pokemon_ptrs.push_back(p1);
+
+        }
+
+        else if (type == 'r' || type == 'R')
+        {   
+            cout << "This rival will merely be put into the Battle Arena, not to the specified location" << endl;
+            
+            if (id < rival_ptrs.size())
+            {
+               throw Invalid_Input("Rival with ID num already exists, even if not active");
+            } 
+
+            if (id > 9 || id <= 0)
+            {
+                throw Invalid_Input("Do not enter an ID greater than 9 or 0/below");
+            }
+
+            //Only one battle arena exists; this code only works for 1 battle arena
+            Rival* r1 = new Rival("New Rival", 5, 29, 5, 4, 20, 1, (*arena_ptrs.begin()));
+            (*arena_ptrs.begin())->AddRival();
+            object_ptrs.push_back(r1);
+            active_ptrs.push_back(r1);
+            rival_ptrs.push_back(r1);    
+        }
+
+
+    }
+
+/*
+       Pokemon* p1 = new Pokemon("Pikachu", 1, 'P', 2, Point2D(5,1));
+       Pokemon* p2 = new Pokemon("Bulbasaur", 2, 'P', 1, Point2D(10,1));
+
+       //int in_Id, Point2D in_loc
+       PokemonCenter* c1 = new PokemonCenter(1, 1, 100, Point2D(1,20));
+       PokemonCenter* c2 = new PokemonCenter(2, 2, 200, Point2D(10,20));
+       
+       /*PokemonGym::PokemonGym(unsigned int max_training_units, unsigned int stamina_cost, double dollar_cost, 
+unsigned int exp_points_per_unit, int in_id, Point2D in_loc) : Building('G', in_id, in_loc)*/
+
+/*
+       PokemonGym* g1 = new PokemonGym(10, 1, 2.0, 3, 1, Point2D());
+       PokemonGym* g2 = new PokemonGym(20, 5, 7.5, 8, 2, Point2D(5,5) );
+
+//BattleArena(unsigned int max_rivals, unsigned int stamina_cost, double dollar_cost, int in_Id, Point2D in_loc)
+       BattleArena* b1 = new BattleArena(3, 5, 5, 1, Point2D(12,13));
+
+//Rival::Rival(string name, double speed, double hp, double phys_dmg, double magic_dmg, double def, int id, Point2D in_loc) 
+       Rival* r1 = new Rival("Snorlax", 5, 29, 5, 4, 20, 1, b1);
+       Rival* r2 = new Rival("Shaiv", 2, 35, 8, 2, 5, 2, b1);
+       Rival* r3 = new Rival("Snake", 2, 50, 6, 5, 5, 2, b1);
+*/
+

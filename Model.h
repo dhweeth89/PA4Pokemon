@@ -54,13 +54,14 @@ class Model
     void Display(View& view);
     void ShowStatus();
 
-    //int GetNumObjects();
-    //int GetNumCenters();
-    //int GetNumGyms();
-    //int GetNumPokemon();
-    //int GetNumArenas();
-    //int GetNumRivals();
+    int GetNumObjects();
+    int GetNumCenters();
+    int GetNumGyms();
+    int GetNumPokemon();
+    int GetNumArenas();
+    int GetNumRivals();
 
+    void NewCommand(char, int, double, double);
 
 
 

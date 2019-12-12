@@ -37,6 +37,7 @@ Pokemon::Pokemon() : GameObject('P')
     name = "Default Pokemon";
     current_center = NULL;
     current_gym = NULL;
+    current_arena = NULL;
     destination = Point2D();
     state = STOPPED;
     delta = Vector2D();
@@ -62,6 +63,7 @@ Pokemon::Pokemon(char in_code) : GameObject(in_code)
     name = "Default Pokemon";
     current_center = NULL;
     current_gym = NULL;
+    current_arena = NULL;
     destination = Point2D();
     delta = Vector2D();
     state = STOPPED;
@@ -123,11 +125,20 @@ void Pokemon::StartMoving(Point2D dest)
         current_gym->RemoveOnePokemon();
         current_gym = NULL;
     }
- 
+
+    if (state == IN_ARENA)
+    {
+        current_arena->RemoveOnePokemon();
+        current_arena = NULL;
+    } 
 
     if (this->state == EXHAUSTED)
     {
         cout << this->display_code << this->id_num << ": I am exhausted. I may move but you cannot see me." << endl;
+    }
+    else if (this->state == FAINTED)
+    {
+        cout << this->display_code << this->id_num << ": I am fainted." << endl;
     }
     else if ((fabs(this->location.x - dest.x)) <= fabs(delta.x) && (fabs(this->location.y - dest.y) <= fabs(delta.y)))
     {
@@ -171,6 +182,10 @@ void Pokemon::StartMovingToCenter(PokemonCenter* center)
     if (this->state == EXHAUSTED)
     {
         cout << this->display_code << this->id_num << ": I am exhausted so I can't move to recover stamina." << endl;
+    }
+    else if (this->state == FAINTED)
+    {
+        cout << this->display_code << this->id_num << ": I am fainted." << endl;
     }
     else if ((fabs(this->location.x - destination.x)) <= fabs(delta.x) && (fabs(this->location.y - destination.y) <= fabs(delta.y)))
     {
@@ -217,6 +232,10 @@ void Pokemon::StartMovingToGym(PokemonGym* gym)
     {
         cout << this->display_code << this->id_num << ": I am exhausted so I shouldn't be going to the gym..." << endl;
     }
+    else if (this->state == FAINTED)
+    {
+        cout << this->display_code << this->id_num << ": I am fainted." << endl;
+    }
     else if ((fabs(this->location.x - destination.x)) <= fabs(delta.x) && (fabs(this->location.y - destination.y) <= fabs(delta.y)))
     {
         cout << this->display_code << this->id_num << ": I'm already at the Pokemon Gym!" << endl;
@@ -261,6 +280,10 @@ void Pokemon::StartMovingToArena(BattleArena* arena)
     {
         cout << this->display_code << this->id_num << ": I am exhausted so I shouldn't be going to the gym..." << endl;
     }
+    else if (this->state == FAINTED)
+    {
+        cout << this->display_code << this->id_num << ": I am fainted." << endl;
+    }
     else if ((fabs(this->location.x - destination.x)) <= fabs(delta.x) && (fabs(this->location.y - destination.y) <= fabs(delta.y)))
     {
         cout << this->display_code << this->id_num << ": I'm already at the Battle Arena!" << endl;
@@ -288,6 +311,10 @@ void Pokemon::StartTraining(unsigned int num_training_units)
     if (this->state == EXHAUSTED)
     {
         cout << this->display_code << this->id_num << ": I am exhausted so no more training for me..." << endl; 
+    }
+    else if (this->state == FAINTED)
+    {
+        cout << this->display_code << this->id_num << ": I am fainted." << endl;
     }
     else if (state != IN_GYM)
     {
@@ -333,6 +360,10 @@ void Pokemon::StartRecoveringStamina(unsigned int num_stamina_points)
     {
         cout << this->display_code << this->id_num << ": I can only recover stamina points at a Pokemon Center!" << endl;
         stamina_points_to_buy = 0;
+    }
+    else if (this->state == FAINTED)
+    {
+        cout << this->display_code << this->id_num << ": I am fainted." << endl;
     }
     else if (current_center->GetNumStaminaPointsRemaining() == 0)
     {
@@ -389,7 +420,7 @@ bool Pokemon::IsExhausted()
 
 bool Pokemon::ShouldBeVisible()
 {
-    if (this->state != EXHAUSTED)
+    if (this->state != EXHAUSTED && this->state != FAINTED)
     {
         return true;
     }
@@ -478,7 +509,7 @@ void Pokemon::ShowStatus()
 
         case BATTLE:
         {
-            cout << "\tBattling " << target->GetName() << endl;
+            cout << "\tBattling " << target->getName() << endl;
             break;
         }
 
@@ -516,6 +547,11 @@ bool Pokemon::Update()
                 state = EXHAUSTED;
                 return true;
             }
+            else if (IsAlive() != true)
+            {
+                state = FAINTED;
+                return true;
+            }
             else
             {
             return false;
@@ -534,6 +570,11 @@ bool Pokemon::Update()
                 if (IsExhausted())
                 {
                     state = EXHAUSTED;
+                    return true;
+                }
+                else if (IsAlive() != true)
+                {
+                    state = FAINTED;
                     return true;
                 }
                 else
@@ -569,6 +610,11 @@ bool Pokemon::Update()
                     state = EXHAUSTED;
                     return true;
                 }
+                else if (IsAlive() != true)
+                {
+                    state = FAINTED;
+                    return true;
+                }
                 else
                 {
                     state = MOVING_TO_CENTER;
@@ -593,6 +639,11 @@ bool Pokemon::Update()
                     state = EXHAUSTED;
                     return true;
                 }
+                else if (IsAlive() != true)
+                {
+                    state = FAINTED;
+                    return true;
+                }
                 else
                 {
                     state = MOVING_TO_GYM;
@@ -610,6 +661,11 @@ bool Pokemon::Update()
                 current_center->RemoveOnePokemon();
                 return true;
             }
+            else if (IsAlive() != true)
+            {
+                state = FAINTED;
+                return true;
+            }
             else
             {
                 return false;
@@ -622,6 +678,11 @@ bool Pokemon::Update()
             {
                 state = EXHAUSTED;
                 current_gym->RemoveOnePokemon();
+                return true;
+            }
+            else if (IsAlive() != true)
+            {
+                state = FAINTED;
                 return true;
             }
             else
@@ -660,6 +721,11 @@ bool Pokemon::Update()
             if (IsExhausted())
             {
                 state = EXHAUSTED;
+                return true;
+            }
+            else if (IsAlive() != true)
+            {
+                state = FAINTED;
                 return true;
             }
             else
@@ -705,6 +771,11 @@ bool Pokemon::Update()
                     state = EXHAUSTED;
                     return true;
                 }
+                else if (IsAlive() != true)
+                {
+                    state = FAINTED;
+                    return true;
+                }
                 else
                 {
                     state = MOVING_TO_ARENA;
@@ -722,6 +793,11 @@ bool Pokemon::Update()
                 current_arena->RemoveOnePokemon();
                 return true;
             }
+            else if (IsAlive() != true)
+            {
+                state = FAINTED;
+                return true;
+            }
             else
             {
                 return false;
@@ -733,6 +809,7 @@ bool Pokemon::Update()
             if (StartBattle() == true)
             {
                 state = FAINTED;
+                current_arena->RemoveOnePokemon();
                 target->IsAlive();
                 return true;
             }

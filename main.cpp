@@ -10,6 +10,7 @@
 #include "GameCommand.h"
 #include "Rival.h"
 #include "BattleArena.h"
+#include "Input_Handling.h"
 
 #include <iostream>
 #include "string.h"
@@ -42,6 +43,7 @@ int main()
     
     
     char entryCode = 0;
+    char type = 0;
     double x;
     double y;
     int id1;
@@ -60,67 +62,124 @@ int main()
     while (entryCode != 'q')
     {
         cout << "Enter Command: ";
+        
         cin >> entryCode;
 
+        try{
         switch (entryCode)
         {
             case 'm':
             {    
-                cin >> id1;
-                cin >> x;
-                cin >> y;
+                if (!(cin >> id1))
+                {
+                    throw Invalid_Input("Expected an integer for Pokemon ID");
+                }
+                
+                if (!(cin >> x))
+                {
+                    throw Invalid_Input("Expected a double for x coordinate");
+                }
+                
+                if (!(cin >> y))
+                {
+                    throw Invalid_Input("Expected a double for y coordinate");
+                }
+
                 DoMoveCommand(model, id1, Point2D(x,y));
+                cin.clear();
+                cin.ignore(500, '\n');
                 break;
             }
 
             case 'g':
             {
-                cin >> id1;
-                cin >> id2;
+                if (!(cin >> id1))
+                {
+                   throw Invalid_Input("Expected an integer for Pokemon ID"); 
+                }
+                if (!(cin >> id2))
+                {
+                   throw Invalid_Input("Expected an integer for Gym ID"); 
+                }
                 DoMoveToGymCommand(model, id1, id2);
+                cin.clear();
+                cin.ignore(500, '\n');
                 break;
             }
 
             case 'c':
             {
-                cin >> id1;
-                cin >> id2;
+                if (!(cin >> id1))
+                {
+                   throw Invalid_Input("Expected an integer for Pokemon ID"); 
+                }
+                if (!(cin >> id2))
+                {
+                   throw Invalid_Input("Expected an integer for Gym ID"); 
+                }
                 DoMoveToCenterCommand(model, id1, id2);
+                cin.clear();
+                cin.ignore(500, '\n');
                 break;
             }
 
             case 's':
             {
-                cin >> id1;
+                if (!(cin >> id1))
+                {
+                   throw Invalid_Input("Expected an integer for Pokemon ID"); 
+                }
                 DoStopCommand(model, id1);
+                cin.clear();
+                cin.ignore(500, '\n');
                 break;
             }
 
             case 'r':
             {
-                cin >> id1;
-                cin >> stamina_amount;
+               if (!(cin >> id1))
+                {
+                   throw Invalid_Input("Expected an integer for Pokemon ID"); 
+                }
+                if (!(cin >> stamina_amount))
+                {
+                   throw Invalid_Input("Expected an unsigned integer for stamina amount"); 
+                }
                 DoRecoverInCenterCommand(model, id1, stamina_amount);
+                cin.clear();
+                cin.ignore(500, '\n');
                 break;
             }
 
             case 't':
             {
-                cin >> id1;
-                cin >> unit_amount;
+                if (!(cin >> id1))
+                {
+                   throw Invalid_Input("Expected an integer for Pokemon ID"); 
+                }
+                if (!(cin >> unit_amount))
+                {
+                   throw Invalid_Input("Expected an unsigned integer for Training Unit Amount"); 
+                }
                 DoTrainInGymCommand(model, id1, unit_amount);
+                cin.clear();
+                cin.ignore(500, '\n');
                 break;
             }
 
             case 'v':
             {
                 DoGoCommand(model, view);
+                cin.clear();
+                cin.ignore(500, '\n');
                 break;
             }
 
             case 'x':
             {
                 DoRunCommand(model, view);
+                cin.clear();
+                cin.ignore(500, '\n');
                 break;
             }
 
@@ -131,25 +190,83 @@ int main()
 
             case 'b':
             {
-                cin >> id1;
-                cin >> id2;
+                if (!(cin >> id1))
+                {
+                   throw Invalid_Input("Expected an integer for Pokemon ID"); 
+                }
+                if (!(cin >> id2))
+                {
+                   throw Invalid_Input("Expected an integer for Rival ID"); 
+                }
                 DoBattleInArenaCommand(model, id1, id2);
+                cin.clear();
+                cin.ignore(500, '\n');
                 break;
             }
 
             case 'a':
             {
-                cin >> id1;
-                cin >> id2;
+                if (!(cin >> id1))
+                {
+                   throw Invalid_Input("Expected an integer for Pokemon ID"); 
+                }
+                if (!(cin >> id2))
+                {
+                   throw Invalid_Input("Expected an integer for Battle Arena ID"); 
+                }
+                  
                 DoMoveToArenaCommand(model, id1, id2);
+                cin.clear();
+                cin.ignore(500, '\n');  
+                break;
+            }
+
+            case 'n':
+            {
+                if (!(cin >> type))
+                {
+                    throw Invalid_Input("Expected a char for display code");
+                }
+                if (!(cin >> id1))
+                {
+                    throw Invalid_Input("Expected an int for the ID #");
+                }
+                if (!(cin >> x))
+                {
+                    throw Invalid_Input("Expected a double for x coordinate");
+                }
+                
+                if (!(cin >> y))
+                {
+                    throw Invalid_Input("Expected a double for y coordinate");
+                }
+
+                if (x > 20 || x < 0 || y < 0 || y > 20)
+                {
+                    throw Invalid_Input("Make sure object is within the plotting boundary range");
+                }
+
+                model.NewCommand(type, id1, x, y);
+                cin.clear();
+                cin.ignore(500, '\n');
                 break;
             }
 
             default:
             {
-                cout << "Please enter a valid command" << endl;
+                throw Invalid_Input("Please enter a valid command code");
                 break;
             }
+        }
+        }
+
+
+        catch (Invalid_Input& except)
+        {
+            cout << "Invalid input - " << except.msg_ptr << endl;
+            cin.clear();
+            cin.ignore(500, '\n');
+            // actions to be taken if the input is wrong
         }
 
     }

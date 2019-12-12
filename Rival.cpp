@@ -39,6 +39,7 @@ Rival::Rival(string name, double speed, double hp, double phys_dmg, double magic
     this->defense = def;
     this->current_arena = arena;
     is_in_arena = true;
+    cout << "RIval constructed" << endl;
 
 }
 
@@ -66,6 +67,7 @@ bool Rival::IsAlive()
     if (health <= 0)
     {
         state = FAINTED_RIVAL;
+        current_arena->RemoveRival();
         return false;
     }
     else
@@ -145,7 +147,7 @@ bool Rival::ShouldBeVisible()
     }
 }
 
-string Rival::GetName()
+string Rival::getName()
 {
     return this->name;
 }

@@ -28,10 +28,12 @@ class GameObject
         void DrawSelf(char *);
         int GetId();
         char GetState();
+        char GetDisplayCode();
         //void ShowStatus();
         virtual bool Update() = 0;
         virtual void ShowStatus();
         virtual bool ShouldBeVisible() = 0;
+        virtual string getName() = 0;
 
 };
 

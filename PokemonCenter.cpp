@@ -112,3 +112,8 @@ void PokemonCenter::ShowStatus()
 
     cout << endl;   
 }
+
+string PokemonCenter::getName()
+{
+    return "";
+}

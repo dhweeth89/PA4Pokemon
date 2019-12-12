@@ -64,3 +64,8 @@ bool Building::ShouldBeVisible()
 {
     return true;
 }
+
+string Building::getName()
+{
+    return "";
+}

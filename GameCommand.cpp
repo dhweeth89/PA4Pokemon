@@ -184,8 +184,12 @@ void DoBattleInArenaCommand(Model& model, int pokemon_id, int rival_id)
         {
             Pokemon* ptrPokemon = model.GetPokemonPtr(pokemon_id);
             Rival* ptrRival = model.GetRivalPtr(rival_id);
-            cout << ptrPokemon->getName() << " battling " << ptrRival->GetName() << endl;
-           
+            
+            if (ptrPokemon->GetState() == IN_ARENA)
+            {
+                cout << ptrPokemon->getName() << " battling " << ptrRival->getName() << endl;
+            }
+            
             ptrPokemon->ReadyBattle(ptrRival);
         }
         

@@ -40,7 +40,10 @@
         bool Update();
         bool IsBeaten();
         void ShowStatus();
-        void RemoveRival();        
+        void RemoveRival();
+        void AddRival();       
+
+        virtual string getName(); 
     };
     
 #endif
